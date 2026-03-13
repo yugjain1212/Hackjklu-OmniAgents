@@ -37,29 +37,25 @@ import {
   Plus,
 } from "lucide-react";
 
-// Main navigation items matching Shopify structure
+// Main navigation items
 const mainNavItems = [
-  { title: "Home", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
-  { title: "Products", href: "/dashboard/products", icon: Package },
-  { title: "Customers", href: "/dashboard/customers", icon: Users },
+  { title: "🏠 Home", href: "/dashboard", icon: LayoutDashboard },
 ];
 
-// Marketing section
-const marketingNavItems = [
-  { title: "Marketing", href: "/dashboard/marketing", icon: Megaphone },
-  { title: "Automations", href: "/dashboard/automations", icon: Zap, badge: "8" },
+// Overnight Team section (was Automations)
+const teamNavItems = [
+  { title: "⚡ Overnight team", href: "/dashboard/automations", icon: Zap, badge: "8" },
+  { title: "📊 Reports", href: "/dashboard/reports", icon: BarChart3 },
 ];
 
-// Analytics section
-const analyticsNavItems = [
-  { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-  { title: "Reports", href: "/dashboard/reports", icon: MessageSquare },
+// Connections section (was Settings/Integrations)
+const connectionsNavItems = [
+  { title: "🔗 Connections", href: "/dashboard/settings", icon: Settings },
 ];
 
-// Apps section
-const appsNavItems = [
-  { title: "Settings", href: "/dashboard/settings", icon: Settings },
+// Settings section
+const settingsNavItems = [
+  { title: "⚙️ Settings", href: "/dashboard/settings#preferences", icon: Settings },
 ];
 
 function Sidebar() {
@@ -122,11 +118,34 @@ function Sidebar() {
       <ScrollArea className="flex-1 py-2">
         <NavSection items={mainNavItems} />
         <div className="my-2 border-t" />
-        <NavSection title="Marketing" items={marketingNavItems} />
+        <NavSection items={teamNavItems} />
         <div className="my-2 border-t" />
-        <NavSection title="Analytics" items={analyticsNavItems} />
+        <NavSection items={connectionsNavItems} />
         <div className="my-2 border-t" />
-        <NavSection title="Apps" items={appsNavItems} />
+        <NavSection items={settingsNavItems} />
+        
+        {/* AI Team Status Card */}
+        <div className="px-3 py-2">
+          <div className="rounded-xl bg-violet-50 p-4">
+            <p className="text-xs font-semibold text-violet-600 mb-3">
+              AI Team Status
+            </p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-xs text-gray-600">
+                <span className="w-2 h-2 rounded-full bg-green-500" />
+                6 agents ready
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-600">
+                <span className="w-2 h-2 rounded-full bg-green-500" />
+                All automations running
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-600">
+                <span className="w-2 h-2 rounded-full bg-violet-500" />
+                Next briefing: 7 AM
+              </div>
+            </div>
+          </div>
+        </div>
       </ScrollArea>
 
       {/* Bottom - Trial Banner */}
