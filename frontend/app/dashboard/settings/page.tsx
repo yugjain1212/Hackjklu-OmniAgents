@@ -26,6 +26,13 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
+  Mail,
+  MessageSquare,
+  FileSpreadsheet,
+  Instagram,
+  Store,
+  Link,
+  Unlink,
 } from "lucide-react";
 
 function ApiKeyInput({
@@ -87,6 +94,65 @@ function ApiKeyInput({
   );
 }
 
+// Integration card component
+function IntegrationCard({
+  name,
+  description,
+  icon: Icon,
+  connected,
+  onConnect,
+}: {
+  name: string;
+  description: string;
+  icon: React.ElementType;
+  connected: boolean;
+  onConnect: () => void;
+}) {
+  return (
+    <div className="flex items-start justify-between p-4 rounded-lg border">
+      <div className="flex items-start gap-3">
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${connected ? "bg-green-500/10" : "bg-muted"}`}>
+          <Icon className={`w-5 h-5 ${connected ? "text-green-500" : "text-muted-foreground"}`} />
+        </div>
+        <div>
+          <div className="flex items-center gap-2">
+            <h4 className="font-medium">{name}</h4>
+            <Badge variant={connected ? "default" : "secondary"} className="text-[10px]">
+              {connected ? (
+                <>
+                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                  Connected
+                </>
+              ) : (
+                "Not Connected"
+              )}
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">{description}</p>
+        </div>
+      </div>
+      <Button
+        variant={connected ? "outline" : "default"}
+        size="sm"
+        onClick={onConnect}
+        className="rounded-full"
+      >
+        {connected ? (
+          <>
+            <Unlink className="w-3 h-3 mr-1" />
+            Disconnect
+          </>
+        ) : (
+          <>
+            <Link className="w-3 h-3 mr-1" />
+            Connect
+          </>
+        )}
+      </Button>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
     groqApiKey: "",
@@ -101,6 +167,14 @@ export default function SettingsPage() {
     theme: "system",
   });
 
+  const [integrations, setIntegrations] = useState({
+    notion: true,
+    gmail: false,
+    sheets: false,
+    whatsapp: false,
+    instagram: false,
+  });
+
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
@@ -110,6 +184,56 @@ export default function SettingsPage() {
           Configure your API keys and preferences
         </p>
       </div>
+
+      {/* Integrations */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Store className="w-5 h-5" />
+            <CardTitle>Integrations</CardTitle>
+          </div>
+          <CardDescription>
+            Connect your business tools to enable automations
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <IntegrationCard
+            name="Notion"
+            description="Save reports and content calendars to Notion"
+            icon={Database}
+            connected={integrations.notion}
+            onConnect={() => setIntegrations({ ...integrations, notion: !integrations.notion })}
+          />
+          <IntegrationCard
+            name="Gmail"
+            description="Send emails and receive morning briefings"
+            icon={Mail}
+            connected={integrations.gmail}
+            onConnect={() => setIntegrations({ ...integrations, gmail: !integrations.gmail })}
+          />
+          <IntegrationCard
+            name="Google Sheets"
+            description="Import sales data and revenue reports"
+            icon={FileSpreadsheet}
+            connected={integrations.sheets}
+            onConnect={() => setIntegrations({ ...integrations, sheets: !integrations.sheets })}
+          />
+          <IntegrationCard
+            name="WhatsApp Business"
+            description="Send daily briefings and customer messages"
+            icon={MessageSquare}
+            connected={integrations.whatsapp}
+            onConnect={() => setIntegrations({ ...integrations, whatsapp: !integrations.whatsapp })}
+          />
+          <IntegrationCard
+            name="Instagram"
+            description="Auto-post content and analyze engagement"
+            icon={Instagram}
+            connected={integrations.instagram}
+            onConnect={() => setIntegrations({ ...integrations, instagram: !integrations.instagram })}
+          />
+        </CardContent>
+      </Card>
 
       {/* API Keys */}
       <Card>

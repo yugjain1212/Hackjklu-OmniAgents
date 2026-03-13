@@ -23,6 +23,12 @@ import {
   Shield,
   ArrowRight,
   Sparkles,
+  Sun,
+  TrendingUp,
+  MessageSquare,
+  Package,
+  IndianRupee,
+  Megaphone,
 } from "lucide-react";
 
 // Agent status types
@@ -42,31 +48,38 @@ const agents: Agent[] = [
   {
     id: "planner",
     name: "Planner",
-    role: "Goal Decomposer",
+    role: "Business Project Manager",
     status: "complete",
     confidence: 9.2,
-    message: "Broke goal into 4 subtasks",
+    message: "Broke goal into 5 subtasks",
     icon: Brain,
   },
   {
     id: "researcher",
     name: "Researcher",
-    role: "Information Gatherer",
+    role: "Business Intelligence",
     status: "active",
-    message: "Searching web for market data...",
+    message: "Searching competitor data...",
     icon: Search,
   },
   {
     id: "analyst",
     name: "Analyst",
-    role: "Data Processor",
+    role: "Business Data Scientist",
     status: "idle",
     icon: BarChart3,
   },
   {
+    id: "marketing",
+    name: "Marketing Analyst",
+    role: "Competitive Intelligence",
+    status: "idle",
+    icon: Megaphone,
+  },
+  {
     id: "writer",
     name: "Writer",
-    role: "Report Generator",
+    role: "Content Creator",
     status: "idle",
     icon: PenTool,
   },
@@ -78,6 +91,62 @@ const agents: Agent[] = [
     icon: Shield,
   },
 ];
+
+// Morning Briefing Component
+function MorningBriefing() {
+  return (
+    <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border-amber-200 dark:border-amber-800">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center">
+              <Sun className="w-6 h-6 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="font-medium text-lg">Good Morning! ☀️</h3>
+              <p className="text-sm text-muted-foreground mt-1">Here's your business briefing for today</p>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                <div className="p-3 rounded-lg bg-white/50 dark:bg-white/5">
+                  <p className="text-[10px] text-muted-foreground uppercase">Yesterday Revenue</p>
+                  <p className="text-lg font-medium flex items-center">
+                    <IndianRupee className="w-4 h-4 mr-0.5" />
+                    12,450
+                  </p>
+                  <p className="text-xs text-green-500">+8% vs avg</p>
+                </div>
+                <div className="p-3 rounded-lg bg-white/50 dark:bg-white/5">
+                  <p className="text-[10px] text-muted-foreground uppercase">Best Product</p>
+                  <p className="text-sm font-medium">Festive Kurtis</p>
+                  <p className="text-xs text-muted-foreground">42% margin</p>
+                </div>
+                <div className="p-3 rounded-lg bg-white/50 dark:bg-white/5">
+                  <p className="text-[10px] text-muted-foreground uppercase">New Reviews</p>
+                  <p className="text-lg font-medium">3</p>
+                  <p className="text-xs text-green-500">All 5★</p>
+                </div>
+                <div className="p-3 rounded-lg bg-white/50 dark:bg-white/5">
+                  <p className="text-[10px] text-muted-foreground uppercase">Stock Alert</p>
+                  <p className="text-sm font-medium text-amber-600">2 items low</p>
+                  <p className="text-xs text-muted-foreground">Check inventory</p>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                <p className="text-sm">
+                  <span className="font-medium">💡 Today's Action:</span> Competitor "StyleHub" launched a 20% discount. Consider a limited-time offer on your best-selling kurtis to maintain market share.
+                </p>
+              </div>
+            </div>
+          </div>
+          <Badge variant="secondary" className="text-[10px]">
+            Auto-generated at 7:00 AM IST
+          </Badge>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 function AgentCard({ agent }: { agent: Agent }) {
   const Icon = agent.icon;
@@ -197,6 +266,9 @@ export default function DashboardPage() {
         </Link>
       </div>
 
+      {/* Morning Briefing */}
+      <MorningBriefing />
+
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
@@ -220,10 +292,11 @@ export default function DashboardPage() {
           trend="Above threshold"
         />
         <StatCard
-          title="Avg. Time"
-          value="47s"
-          description="Per completion"
-          icon={Clock}
+          title="Est. Value Generated"
+          value="₹1.2L"
+          description="From insights"
+          icon={IndianRupee}
+          trend="ROI: 450%"
         />
       </div>
 

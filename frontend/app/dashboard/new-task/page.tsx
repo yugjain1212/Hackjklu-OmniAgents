@@ -28,6 +28,12 @@ import {
   User,
   ChevronRight,
   ExternalLink,
+  Megaphone,
+  TrendingUp,
+  Store,
+  MapPin,
+  Target,
+  IndianRupee,
 } from "lucide-react";
 
 // Message types for chat interface
@@ -164,8 +170,9 @@ function ChatMessage({ message }: { message: Message }) {
       Planner: "from-violet-500 to-purple-500",
       Researcher: "from-blue-500 to-cyan-500",
       Analyst: "from-amber-500 to-orange-500",
+      "Marketing Analyst": "from-fuchsia-500 to-pink-500",
       Writer: "from-emerald-500 to-teal-500",
-      Critic: "from-rose-500 to-pink-500",
+      Critic: "from-rose-500 to-red-500",
     };
 
     return (
@@ -200,19 +207,37 @@ function ChatMessage({ message }: { message: Message }) {
   );
 }
 
+// Business profile type
+interface BusinessProfile {
+  name: string;
+  industry: string;
+  revenue: string;
+  city: string;
+  goal: string;
+}
+
 export default function NewTaskPage() {
   const [input, setInput] = useState("");
+  const [businessProfile, setBusinessProfile] = useState<BusinessProfile>({
+    name: "Riya's Boutique",
+    industry: "clothing",
+    revenue: "3-5L",
+    city: "Pune",
+    goal: "grow_sales",
+  });
+  const [showProfileForm, setShowProfileForm] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
       type: "system",
-      content: "Welcome! Describe your goal and I'll orchestrate the agents to help you.",
+      content: "Welcome! I'm your AI business assistant. Describe your goal and I'll analyze competitors, find marketing gaps, and create a growth plan for your business.",
       timestamp: new Date(),
     },
   ]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState(-1);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [criticRejected, setCriticRejected] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom
@@ -238,19 +263,23 @@ export default function NewTaskPage() {
     setIsProcessing(true);
     setShowSidebar(true);
 
-    // Simulate agent pipeline with chat messages
+    // Simulate agent pipeline with chat messages - 6 agents
     const agentSteps = [
-      { agent: "Planner", message: "Breaking down your goal into actionable subtasks...", delay: 1000 },
-      { agent: "Planner", message: "Created 4 subtasks: Market Analysis, Competitor Research, Risk Assessment, and Recommendation Generation.", delay: 2000 },
-      { agent: "Researcher", message: "Searching for relevant information and sources...", delay: 1500 },
-      { agent: "Researcher", message: "Found 12 credible sources including market reports, competitor data, and industry analysis.", delay: 2500 },
-      { agent: "Analyst", message: "Processing research data and extracting insights...", delay: 1500 },
-      { agent: "Analyst", message: "Identified 8 key insights including market opportunities, competitive advantages, and potential risks.", delay: 2500 },
-      { agent: "Writer", message: "Generating comprehensive report based on analysis...", delay: 1500 },
-      { agent: "Writer", message: "Report draft completed with executive summary, findings, and recommendations.", delay: 2500 },
-      { agent: "Critic", message: "Evaluating report quality and accuracy...", delay: 1500 },
-      { agent: "Critic", message: "Report approved with confidence score 9.2/10. Quality meets all criteria.", delay: 2000 },
+      { agent: "Planner", message: `Analyzing your business: ${businessProfile.name} (${businessProfile.industry}) in ${businessProfile.city}...`, delay: 1000 },
+      { agent: "Planner", message: "Created 5 subtasks: Competitor Analysis, Market Research, Marketing Intelligence, Content Strategy, and Growth Plan.", delay: 2000 },
+      { agent: "Researcher", message: "Searching for competitor data and market trends in Indian D2C clothing space...", delay: 1500 },
+      { agent: "Researcher", message: "Found 14 sources: competitor websites, market reports, pricing data, and customer reviews.", delay: 2500 },
+      { agent: "Analyst", message: "Analyzing revenue gap from ₹3L to ₹10L/month and identifying bottlenecks...", delay: 1500 },
+      { agent: "Analyst", message: "Key bottleneck identified: Low customer retention (18%). Best performing: Festive wear (42% margin).", delay: 2500 },
+      { agent: "Marketing Analyst", message: "Analyzing competitor marketing strategies and ad campaigns...", delay: 1500 },
+      { agent: "Marketing Analyst", message: "Gap found: No competitor targets working professionals with premium ethnic wear. Opportunity identified!", delay: 2500 },
+      { agent: "Writer", message: "Creating your growth plan with Instagram content, WhatsApp messages, and email drafts...", delay: 1500 },
+      { agent: "Writer", message: "Generated: 7 Instagram posts, 3 WhatsApp broadcasts, 1 email newsletter, and month-by-month action plan.", delay: 2500 },
+      { agent: "Critic", message: "Reviewing all outputs for accuracy and Indian market appropriateness...", delay: 1500 },
     ];
+    
+    // Add critic rejection simulation (30% chance)
+    const shouldReject = Math.random() < 0.3;
 
     for (let i = 0; i < agentSteps.length; i++) {
       setCurrentStep(i);
@@ -267,15 +296,61 @@ export default function NewTaskPage() {
       setMessages((prev) => [...prev, agentMessage]);
     }
 
-    // Final report message
+    // Simulate critic rejection and retry
+    if (shouldReject) {
+      setCriticRejected(true);
+      const rejectMessage: Message = {
+        id: `critic-reject-${Date.now()}`,
+        type: "agent",
+        agent: "Critic",
+        content: "REJECTED - Score: 5.5/10. Issues found: Missing competitor pricing data for premium segment. Send back to: Marketing Analyst",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, rejectMessage]);
+      
+      // Retry Marketing Analyst
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const retryMessage: Message = {
+        id: `retry-${Date.now()}`,
+        type: "agent",
+        agent: "Marketing Analyst",
+        content: "Retrying... Found detailed pricing for 5 premium competitors. Range: ₹2,500-₹8,000 per outfit.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, retryMessage]);
+      
+      // Critic approves after retry
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const approveMessage: Message = {
+        id: `critic-approve-${Date.now()}`,
+        type: "agent",
+        agent: "Critic",
+        content: "APPROVED - Score: 9.2/10. Quality check passed. All data verified. Authorizing: Notion save + content delivery.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, approveMessage]);
+      setCriticRejected(false);
+    } else {
+      // Direct approval
+      const approveMessage: Message = {
+        id: `critic-approve-${Date.now()}`,
+        type: "agent",
+        agent: "Critic",
+        content: "APPROVED - Score: 9.2/10. Quality check passed. All data verified. Authorizing: Notion save + content delivery.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, approveMessage]);
+    }
+
+    // Final report message with Indian context
     const reportMessage: Message = {
       id: `report-${Date.now()}`,
       type: "report",
-      content: "Your comprehensive analysis report is ready with executive summary, market findings, competitive analysis, risk assessment, and strategic recommendations.",
+      content: `Your complete business growth plan is ready! Includes: Competitor analysis for ${businessProfile.city} market, marketing gap identification, 7 Instagram posts, 3 WhatsApp messages, 1 email newsletter, and month-by-month plan to reach ₹10L/month.`,
       timestamp: new Date(),
       metadata: {
         confidence: 9.2,
-        sources: 12,
+        sources: 14,
         insights: 8,
         notionUrl: "https://notion.so/...",
       },
@@ -293,11 +368,12 @@ export default function NewTaskPage() {
   };
 
   const agents = [
-    { icon: Brain, name: "Planner", role: "Goal Decomposer", status: getAgentStatus(0, Math.floor(currentStep / 2)) },
-    { icon: Search, name: "Researcher", role: "Information Gatherer", status: getAgentStatus(1, Math.floor(currentStep / 2)) },
-    { icon: BarChart3, name: "Analyst", role: "Data Processor", status: getAgentStatus(2, Math.floor(currentStep / 2)) },
-    { icon: PenTool, name: "Writer", role: "Report Generator", status: getAgentStatus(3, Math.floor(currentStep / 2)) },
-    { icon: Shield, name: "Critic", role: "Quality Controller", status: getAgentStatus(4, Math.floor(currentStep / 2)) },
+    { icon: Brain, name: "Planner", role: "Business Project Manager", status: getAgentStatus(0, Math.floor(currentStep / 2)) },
+    { icon: Search, name: "Researcher", role: "Business Intelligence", status: getAgentStatus(1, Math.floor(currentStep / 2)) },
+    { icon: BarChart3, name: "Analyst", role: "Business Data Scientist", status: getAgentStatus(2, Math.floor(currentStep / 2)) },
+    { icon: Megaphone, name: "Marketing Analyst", role: "Competitive Intelligence", status: getAgentStatus(3, Math.floor(currentStep / 2)) },
+    { icon: PenTool, name: "Writer", role: "Content Creator", status: getAgentStatus(4, Math.floor(currentStep / 2)) },
+    { icon: Shield, name: "Critic", role: "Quality Controller", status: getAgentStatus(5, Math.floor(currentStep / 2)) },
   ];
 
   return (
@@ -306,9 +382,23 @@ export default function NewTaskPage() {
       <div className={`flex-1 flex flex-col ${showSidebar ? "border-r" : ""}`}>
         {/* Header */}
         <div className="px-6 py-4 border-b flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-display tracking-tight">New Task</h1>
-            <p className="text-xs text-muted-foreground">Chat with your AI agents</p>
+          <div className="flex items-center gap-4">
+            <div>
+              <h1 className="text-xl font-display tracking-tight">New Task</h1>
+              <p className="text-xs text-muted-foreground">Chat with your AI business assistant</p>
+            </div>
+            {/* Business Profile Badge */}
+            <div 
+              className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full cursor-pointer hover:bg-muted/80 transition-colors"
+              onClick={() => setShowProfileForm(!showProfileForm)}
+            >
+              <Store className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-xs font-medium">{businessProfile.name}</span>
+              <Badge variant="secondary" className="text-[10px] px-1.5">
+                <IndianRupee className="w-3 h-3 mr-0.5" />
+                {businessProfile.revenue}/month
+              </Badge>
+            </div>
           </div>
           {showSidebar && (
             <Button variant="ghost" size="sm" onClick={() => setShowSidebar(!showSidebar)}>
@@ -316,6 +406,72 @@ export default function NewTaskPage() {
             </Button>
           )}
         </div>
+
+        {/* Business Profile Form (Collapsible) */}
+        {showProfileForm && (
+          <div className="px-6 py-4 border-b bg-muted/30">
+            <div className="max-w-3xl mx-auto">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium flex items-center gap-2">
+                  <Store className="w-4 h-4" />
+                  Business Profile
+                </h3>
+                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setShowProfileForm(false)}>
+                  Done
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div>
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Business Name</label>
+                  <input
+                    type="text"
+                    value={businessProfile.name}
+                    onChange={(e) => setBusinessProfile({...businessProfile, name: e.target.value})}
+                    className="w-full mt-1 px-2 py-1.5 text-sm bg-background border rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Industry</label>
+                  <select
+                    value={businessProfile.industry}
+                    onChange={(e) => setBusinessProfile({...businessProfile, industry: e.target.value})}
+                    className="w-full mt-1 px-2 py-1.5 text-sm bg-background border rounded-md"
+                  >
+                    <option value="clothing">Clothing</option>
+                    <option value="food">Food</option>
+                    <option value="salon">Salon</option>
+                    <option value="tech">Tech</option>
+                    <option value="services">Services</option>
+                    <option value="retail">Retail</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Monthly Revenue</label>
+                  <select
+                    value={businessProfile.revenue}
+                    onChange={(e) => setBusinessProfile({...businessProfile, revenue: e.target.value})}
+                    className="w-full mt-1 px-2 py-1.5 text-sm bg-background border rounded-md"
+                  >
+                    <option value="0-1L">₹0 - 1L</option>
+                    <option value="1-5L">₹1 - 5L</option>
+                    <option value="5-10L">₹5 - 10L</option>
+                    <option value="10L+">₹10L+</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wider">City</label>
+                  <input
+                    type="text"
+                    value={businessProfile.city}
+                    onChange={(e) => setBusinessProfile({...businessProfile, city: e.target.value})}
+                    className="w-full mt-1 px-2 py-1.5 text-sm bg-background border rounded-md"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Messages */}
         <ScrollArea className="flex-1 px-6" ref={scrollRef}>
@@ -396,6 +552,19 @@ export default function NewTaskPage() {
             </div>
           </ScrollArea>
 
+          {/* Critic Rejection Alert */}
+          {criticRejected && (
+            <div className="p-3 mx-4 mt-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-amber-600">Quality Check Failed</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">Score: 5.5/10 - Retrying...</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Quick Stats */}
           <div className="p-4 border-t space-y-3">
             <div className="flex items-center justify-between text-xs">
@@ -411,6 +580,17 @@ export default function NewTaskPage() {
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Confidence</span>
               <span className="font-medium text-green-500">9.2/10</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Business</span>
+              <span className="font-medium">{businessProfile.name}</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Revenue</span>
+              <span className="font-medium flex items-center">
+                <IndianRupee className="w-3 h-3 mr-0.5" />
+                {businessProfile.revenue}/month
+              </span>
             </div>
           </div>
         </div>

@@ -17,6 +17,7 @@ import {
   Bell,
   User,
   LogOut,
+  Zap,
 } from "lucide-react";
 
 const sidebarNavItems = [
@@ -34,6 +35,11 @@ const sidebarNavItems = [
     title: "Active Jobs",
     href: "/dashboard/jobs",
     icon: Activity,
+  },
+  {
+    title: "Automations",
+    href: "/dashboard/automations",
+    icon: Zap,
   },
   {
     title: "Reports",
