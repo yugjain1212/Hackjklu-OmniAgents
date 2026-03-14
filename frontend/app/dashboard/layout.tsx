@@ -17,73 +17,80 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import {
-  LayoutDashboard,
-  ShoppingCart,
-  Package,
-  Users,
-  Megaphone,
-  MessageSquare,
-  BarChart3,
+  LayoutGrid,
   Zap,
+  FileText,
   Settings,
   Menu,
-  Sparkles,
   Bell,
   Search,
-  ChevronDown,
   LogOut,
   User,
   HelpCircle,
-  Plus,
+  ChevronRight,
+  Layers,
+  Activity,
 } from "lucide-react";
 
-// Main navigation items matching Shopify structure
-const mainNavItems = [
-  { title: "Home", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
-  { title: "Products", href: "/dashboard/products", icon: Package },
-  { title: "Customers", href: "/dashboard/customers", icon: Users },
+const navItems = [
+  {
+    title: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutGrid,
+  },
+  {
+    title: "Automations",
+    href: "/dashboard/automations",
+    icon: Zap,
+    badge: "8",
+  },
+  {
+    title: "Reports",
+    href: "/dashboard/reports",
+    icon: FileText,
+  },
+  {
+    title: "Activity",
+    href: "/dashboard/jobs",
+    icon: Activity,
+  },
 ];
 
-// Marketing section
-const marketingNavItems = [
-  { title: "Marketing", href: "/dashboard/marketing", icon: Megaphone },
-  { title: "Automations", href: "/dashboard/automations", icon: Zap, badge: "8" },
-];
-
-// Analytics section
-const analyticsNavItems = [
-  { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-  { title: "Reports", href: "/dashboard/reports", icon: MessageSquare },
-];
-
-// Apps section
-const appsNavItems = [
-  { title: "Settings", href: "/dashboard/settings", icon: Settings },
+const bottomNavItems = [
+  {
+    title: "Integrations",
+    href: "/dashboard/settings",
+    icon: Layers,
+  },
+  {
+    title: "Settings",
+    href: "/dashboard/settings#preferences",
+    icon: Settings,
+  },
 ];
 
 function Sidebar() {
   const pathname = usePathname();
 
-  const NavItem = ({ item }: { item: any }) => {
+  const NavItem = ({ item, isBottom = false }: { item: any; isBottom?: boolean }) => {
     const Icon = item.icon;
     const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
     
     return (
       <Link
         href={item.href}
-        className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+        className={`group flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
           isActive
-            ? "bg-accent text-accent-foreground"
-            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+            ? "bg-zinc-900 text-white"
+            : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
         }`}
       >
         <div className="flex items-center gap-3">
-          <Icon className="w-[18px] h-[18px]" />
+          <Icon className={`w-[18px] h-[18px] ${isActive ? "text-white" : "text-zinc-400 group-hover:text-zinc-600"}`} />
           <span>{item.title}</span>
         </div>
         {item.badge && (
-          <Badge variant="secondary" className="text-xs h-5 px-1.5">
+          <Badge variant="secondary" className={`text-[10px] h-5 px-1.5 font-medium ${isActive ? "bg-white/20 text-white" : "bg-zinc-200 text-zinc-600"}`}>
             {item.badge}
           </Badge>
         )}
@@ -91,52 +98,48 @@ function Sidebar() {
     );
   };
 
-  const NavSection = ({ title, items }: { title?: string; items: any[] }) => (
-    <div className="px-3 py-2">
-      {title && (
-        <h3 className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          {title}
-        </h3>
-      )}
-      <nav className="space-y-0.5">
-        {items.map((item) => (
-          <NavItem key={item.href} item={item} />
-        ))}
-      </nav>
-    </div>
-  );
-
   return (
-    <div className="flex h-full flex-col border-r bg-card">
+    <div className="flex h-full flex-col bg-white border-r border-zinc-200">
       {/* Logo */}
-      <div className="flex h-14 items-center border-b px-4">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-foreground flex items-center justify-center">
-            <Sparkles className="w-3.5 h-3.5 text-background" />
+      <div className="flex h-16 items-center px-5 border-b border-zinc-100">
+        <Link href="/dashboard" className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
+            <Zap className="w-4 h-4 text-white" />
           </div>
-          <span className="text-base font-semibold tracking-tight">OmniAgent</span>
+          <span className="text-lg font-semibold tracking-tight text-zinc-900">OmniAgent</span>
         </Link>
       </div>
 
       {/* Navigation */}
-      <ScrollArea className="flex-1 py-2">
-        <NavSection items={mainNavItems} />
-        <div className="my-2 border-t" />
-        <NavSection title="Marketing" items={marketingNavItems} />
-        <div className="my-2 border-t" />
-        <NavSection title="Analytics" items={analyticsNavItems} />
-        <div className="my-2 border-t" />
-        <NavSection title="Apps" items={appsNavItems} />
+      <ScrollArea className="flex-1 py-4">
+        <div className="px-3 space-y-1">
+          {navItems.map((item) => (
+            <NavItem key={item.href} item={item} />
+          ))}
+        </div>
       </ScrollArea>
 
-      {/* Bottom - Trial Banner */}
-      <div className="border-t p-3">
-        <div className="rounded-lg bg-muted p-3">
-          <p className="text-xs font-medium text-foreground">Trial ends in 14 days</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Subscribe for ₹999/mo</p>
-          <Button size="sm" className="w-full mt-2 text-xs h-8">
-            Subscribe now
-          </Button>
+      {/* Bottom Navigation */}
+      <div className="border-t border-zinc-100 p-3 space-y-1">
+        {bottomNavItems.map((item) => (
+          <NavItem key={item.href} item={item} isBottom />
+        ))}
+      </div>
+
+      {/* User Profile Card */}
+      <div className="border-t border-zinc-100 p-3">
+        <div className="rounded-lg bg-zinc-50 p-3">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-9 w-9 border-2 border-white shadow-sm">
+              <AvatarFallback className="bg-violet-100 text-violet-700 text-sm font-semibold">
+                OM
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-zinc-900 truncate">Omni User</p>
+              <p className="text-xs text-zinc-500 truncate">user@omniagent.com</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -167,7 +170,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden bg-zinc-50">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block w-60">
         <Sidebar />
@@ -175,80 +178,51 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header - Shopify Style */}
-        <header className="flex h-14 items-center justify-between border-b bg-card px-4">
+        {/* Header */}
+        <header className="flex h-16 items-center justify-between border-b border-zinc-200 bg-white px-6">
           <div className="flex items-center gap-4 flex-1">
             <MobileSidebar />
             
             {/* Search Bar */}
-            <div className="hidden md:flex items-center flex-1 max-w-md">
+            <div className="hidden md:flex items-center flex-1 max-w-lg">
               <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <input
                   type="text"
-                  placeholder="Search"
-                  className="w-full h-9 pl-9 pr-4 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Search automations, reports..."
+                  className="w-full h-10 pl-10 pr-4 rounded-lg border border-zinc-200 bg-zinc-50 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-300 focus:bg-white transition-all"
                 />
               </div>
             </div>
           </div>
 
           {/* Right Side Actions */}
-          <div className="flex items-center gap-1">
-            {/* Store Selector */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2 hidden sm:flex">
-                  <span className="font-medium">My Store</span>
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>Your stores</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded bg-primary/10 flex items-center justify-center text-xs font-bold">
-                      M
-                    </div>
-                    <span>My Store</span>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add store
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
+          <div className="flex items-center gap-2">
             {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" />
+            <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-lg hover:bg-zinc-100">
+              <Bell className="h-5 w-5 text-zinc-500" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-violet-500 rounded-full" />
             </Button>
 
             {/* Help */}
-            <Button variant="ghost" size="icon">
-              <HelpCircle className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg hover:bg-zinc-100">
+              <HelpCircle className="h-5 w-5 text-zinc-500" />
             </Button>
 
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="ml-1">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+                <Button variant="ghost" className="gap-2 h-9 px-2 hover:bg-zinc-100 rounded-lg">
+                  <Avatar className="h-7 w-7">
+                    <AvatarFallback className="bg-violet-100 text-violet-700 text-xs font-semibold">
                       OM
                     </AvatarFallback>
                   </Avatar>
+                  <ChevronRight className="h-4 w-4 text-zinc-400" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>Omni User</DropdownMenuLabel>
-                <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
-                  user@omniagent.com
-                </DropdownMenuLabel>
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <User className="mr-2 h-4 w-4" />
@@ -259,7 +233,7 @@ export default function DashboardLayout({
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem className="text-red-600">
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign out
                 </DropdownMenuItem>
@@ -269,11 +243,10 @@ export default function DashboardLayout({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto bg-muted/30">
+        <main className="flex-1 overflow-auto">
           {children}
         </main>
       </div>
     </div>
   );
 }
-
