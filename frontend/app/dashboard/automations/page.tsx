@@ -236,9 +236,10 @@ export default function AutomationsPage() {
             {automationList.map((automation) => (
               <Card 
                 key={automation.id} 
-                className={`border-0 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                className={`border-0 shadow-sm hover:shadow-lg transition-all cursor-pointer group ${
                   automation.status === "paused" ? "opacity-75" : ""
                 }`}
+                onClick={() => window.location.href = `/dashboard/automations/${automation.id}`}
               >
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between mb-4">
@@ -254,6 +255,7 @@ export default function AutomationsPage() {
                     <Switch 
                       checked={automation.status === "active"}
                       onCheckedChange={() => toggleAutomation(automation.id)}
+                      onClick={(e) => e.stopPropagation()}
                     />
                   </div>
 
