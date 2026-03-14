@@ -1,276 +1,408 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import {
-  ArrowRight,
-  RefreshCw,
-  Instagram,
-  AlertTriangle,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  ShoppingBag,
+  Users,
   Package,
-  Search,
-  Star,
-  MessageCircle,
+  ArrowUpRight,
+  ArrowDownRight,
+  MoreHorizontal,
+  Calendar,
   Zap,
-  Clock,
-  CheckCircle2,
   AlertCircle,
+  CheckCircle2,
+  Clock,
 } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+} from "recharts";
 
-// Quick suggestion pills for boutique owners
-const quickSuggestions = [
+// Mock data for charts
+const salesData = [
+  { date: "Feb 12", sales: 0 },
+  { date: "Feb 14", sales: 0 },
+  { date: "Feb 16", sales: 0 },
+  { date: "Feb 18", sales: 0 },
+  { date: "Feb 20", sales: 0 },
+  { date: "Feb 22", sales: 0 },
+  { date: "Feb 24", sales: 0 },
+  { date: "Feb 26", sales: 0 },
+  { date: "Feb 28", sales: 0 },
+  { date: "Mar 2", sales: 0 },
+  { date: "Mar 4", sales: 0 },
+  { date: "Mar 6", sales: 0 },
+  { date: "Mar 8", sales: 0 },
+  { date: "Mar 10", sales: 0 },
+  { date: "Mar 12", sales: 3 },
+];
+
+const recentOrders = [
+  { id: "#1001", customer: "Rahul Sharma", amount: "₹2,499", status: "completed", date: "2 min ago" },
+  { id: "#1002", customer: "Priya Patel", amount: "₹1,899", status: "processing", date: "15 min ago" },
+  { id: "#1003", customer: "Amit Kumar", amount: "₹3,299", status: "pending", date: "1 hour ago" },
+  { id: "#1004", customer: "Sneha Gupta", amount: "₹999", status: "completed", date: "2 hours ago" },
+];
+
+const automations = [
+  { id: 1, name: "Order Management", status: "active", lastRun: "2 min ago", icon: ShoppingBag },
+  { id: 2, name: "Inventory Alerts", status: "active", lastRun: "1 hour ago", icon: Package },
+  { id: 3, name: "Review Management", status: "warning", lastRun: "2 hours ago", icon: AlertCircle },
+  { id: 4, name: "Social Media", status: "active", lastRun: "5 hours ago", icon: Zap },
+];
+
+const stats = [
   {
-    icon: "🔄",
-    label: "Bring back lost customers",
-    prompt: "Find all customers who bought from me but haven't ordered in 30 days. Write them a personal re-engagement message with a discount offer and send it.",
+    title: "Total Sales",
+    value: "₹0.00",
+    change: "+0%",
+    trend: "up",
+    icon: DollarSign,
+    color: "text-emerald-600",
+    bgColor: "bg-emerald-50",
   },
   {
-    icon: "📱",
-    label: "Write this week's Instagram posts",
-    prompt: "Write 7 Instagram captions for this week for my clothing boutique. Include hashtags and best posting times.",
+    title: "Orders",
+    value: "0",
+    change: "+0%",
+    trend: "up",
+    icon: ShoppingBag,
+    color: "text-blue-600",
+    bgColor: "bg-blue-50",
   },
   {
-    icon: "📊",
-    label: "Why did my sales drop?",
-    prompt: "My sales have been lower than usual. Analyse my recent sales data, check what competitors are doing, and tell me exactly why and how to fix it.",
+    title: "Customers",
+    value: "0",
+    change: "+0%",
+    trend: "neutral",
+    icon: Users,
+    color: "text-purple-600",
+    bgColor: "bg-purple-50",
   },
   {
-    icon: "⚠️",
-    label: "Check my stock levels",
-    prompt: "Check my current inventory. Find what is running low. Draft reorder emails to suppliers for low stock items.",
-  },
-  {
-    icon: "🕵️",
-    label: "What is my competitor doing?",
-    prompt: "Research what my top competitors in Indian fashion are doing right now — their ads, their sales, their Instagram strategy. Find gaps I can exploit.",
-  },
-  {
-    icon: "⭐",
-    label: "Reply to my reviews",
-    prompt: "Check my recent Google reviews. Draft professional replies to all unanswered reviews. Flag any 1-2 star reviews urgently.",
+    title: "Avg Order Value",
+    value: "₹0.00",
+    change: "-0%",
+    trend: "down",
+    icon: TrendingUp,
+    color: "text-orange-600",
+    bgColor: "bg-orange-50",
   },
 ];
 
-// Mock data for morning briefing
-const morningBriefing = {
-  revenue: "14,200",
-  growth: "+18%",
-  orders: 19,
-  bestSeller: "Floral Co-ord",
-  alerts: 43,
-};
-
-export default function DashboardPage() {
-  const [goalInput, setGoalInput] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [showBriefing, setShowBriefing] = useState(true);
-
-  const handleSuggestionClick = (prompt: string) => {
-    setGoalInput(prompt);
-  };
-
-  const handleRunAgents = () => {
-    if (!goalInput.trim()) return;
-    setIsProcessing(true);
-    // Simulate processing
-    setTimeout(() => setIsProcessing(false), 3000);
-  };
-
-  // Check if it's morning (6 AM - 10 AM)
-  const currentHour = new Date().getHours();
-  const isMorning = currentHour >= 6 && currentHour < 10;
-
+function StatCard({ stat }: { stat: any }) {
+  const Icon = stat.icon;
+  const TrendIcon = stat.trend === "up" ? ArrowUpRight : stat.trend === "down" ? ArrowDownRight : null;
+  
   return (
-    <div className="p-6 space-y-6 max-w-5xl mx-auto">
-      {/* Morning Briefing Card */}
-      {isMorning && showBriefing && (
-        <Card className="bg-gradient-to-r from-violet-600 to-violet-700 text-white border-0">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-white/70 mb-1">
-                  Today&apos;s Briefing
-                </p>
-                <h2 className="text-xl font-semibold mb-3">
-                  Good morning, Riya&apos;s Boutique!
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary" className="bg-white/15 text-white border-0">
-                    ₹{morningBriefing.revenue} yesterday
-                  </Badge>
-                  <Badge variant="secondary" className="bg-white/15 text-white border-0">
-                    {morningBriefing.orders} orders
-                  </Badge>
-                  <Badge variant="secondary" className="bg-amber-400/20 text-amber-100 border-0">
-                    <AlertTriangle className="w-3 h-3 mr-1" />
-                    {morningBriefing.alerts} alerts
-                  </Badge>
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
+            <h3 className="text-2xl font-bold mt-1">{stat.value}</h3>
+            <div className="flex items-center gap-1 mt-1">
+              {TrendIcon && (
+                <TrendIcon className={`h-4 w-4 ${stat.trend === "up" ? "text-emerald-600" : "text-red-600"}`} />
+              )}
+              <span className={`text-sm ${stat.trend === "up" ? "text-emerald-600" : stat.trend === "down" ? "text-red-600" : "text-muted-foreground"}`}>
+                {stat.change}
+              </span>
+              <span className="text-sm text-muted-foreground">vs last 30 days</span>
+            </div>
+          </div>
+          <div className={`p-3 rounded-xl ${stat.bgColor}`}>
+            <Icon className={`h-5 w-5 ${stat.color}`} />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SalesChart() {
+  return (
+    <Card className="col-span-2">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-base font-semibold">Sales over time</CardTitle>
+            <CardDescription>Sessions by top 5 channels</CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="h-8">
+              <Calendar className="h-4 w-4 mr-2" />
+              Last 30 days
+            </Button>
+            <Select defaultValue="daily">
+              <SelectTrigger className="w-[100px] h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="daily">Daily</SelectItem>
+                <SelectItem value="weekly">Weekly</SelectItem>
+                <SelectItem value="monthly">Monthly</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={salesData}>
+              <defs>
+                <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+              <XAxis 
+                dataKey="date" 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fontSize: 12, fill: '#6b7280' }}
+                dy={10}
+              />
+              <YAxis 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fontSize: 12, fill: '#6b7280' }}
+              />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'white', 
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                }}
+              />
+              <Area 
+                type="monotone" 
+                dataKey="sales" 
+                stroke="#3b82f6" 
+                strokeWidth={2}
+                fillOpacity={1} 
+                fill="url(#colorSales)" 
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="flex items-center justify-center gap-6 mt-4">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-blue-500" />
+            <span className="text-sm text-muted-foreground">Direct</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function RecentOrdersTable() {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base font-semibold">Recent Orders</CardTitle>
+          <Link href="/dashboard/orders">
+            <Button variant="ghost" size="sm" className="h-8 text-blue-600">
+              View all
+              <ArrowUpRight className="h-4 w-4 ml-1" />
+            </Button>
+          </Link>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {recentOrders.map((order) => (
+            <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-9 w-9">
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                    {order.customer.split(' ').map(n => n[0]).join('')}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-medium">{order.customer}</p>
+                  <p className="text-xs text-muted-foreground">{order.id} • {order.date}</p>
                 </div>
               </div>
-              <Button 
-                variant="secondary" 
-                className="bg-white text-violet-600 hover:bg-white/90 shrink-0"
-              >
-                View full briefing
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
+              <div className="text-right">
+                <p className="text-sm font-medium">{order.amount}</p>
+                <Badge 
+                  variant={order.status === "completed" ? "default" : order.status === "processing" ? "secondary" : "outline"}
+                  className="text-xs mt-1"
+                >
+                  {order.status}
+                </Badge>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Goal Input Section */}
-      <div className="space-y-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
-            What do you need today?
-          </p>
-          <Textarea
-            placeholder="Type your problem or goal in Hindi or English... e.g. 'Bring back customers who haven't ordered in 30 days'"
-            value={goalInput}
-            onChange={(e) => setGoalInput(e.target.value)}
-            className="min-h-[120px] text-base resize-none"
-          />
+          ))}
         </div>
+      </CardContent>
+    </Card>
+  );
+}
 
-        {/* Quick Suggestions */}
-        <div>
-          <p className="text-xs text-gray-500 mb-3">Common tasks:</p>
-          <div className="flex flex-wrap gap-2">
-            {quickSuggestions.map((suggestion, i) => (
-              <button
-                key={i}
-                onClick={() => handleSuggestionClick(suggestion.prompt)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm bg-gray-100 text-gray-700 border border-gray-200 hover:bg-violet-50 hover:border-violet-200 hover:text-violet-700 transition-all"
-              >
-                <span>{suggestion.icon}</span>
-                {suggestion.label}
-              </button>
-            ))}
+function AutomationStatus() {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base font-semibold">Active Automations</CardTitle>
+          <Link href="/dashboard/automations">
+            <Button variant="ghost" size="sm" className="h-8 text-blue-600">
+              Manage
+              <ArrowUpRight className="h-4 w-4 ml-1" />
+            </Button>
+          </Link>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {automations.map((automation) => {
+            const Icon = automation.icon;
+            return (
+              <div key={automation.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${automation.status === "active" ? "bg-emerald-50" : "bg-amber-50"}`}>
+                    <Icon className={`h-4 w-4 ${automation.status === "active" ? "text-emerald-600" : "text-amber-600"}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{automation.name}</p>
+                    <p className="text-xs text-muted-foreground">Last run {automation.lastRun}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {automation.status === "active" ? (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-amber-600" />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-4 p-3 rounded-lg bg-blue-50 border border-blue-100">
+          <div className="flex items-start gap-3">
+            <div className="p-1.5 rounded-full bg-blue-100">
+              <Zap className="h-4 w-4 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-blue-900">Automation tip</p>
+              <p className="text-xs text-blue-700 mt-0.5">
+                Enable Inventory Alerts to get notified when stock runs low automatically.
+              </p>
+            </div>
           </div>
         </div>
+      </CardContent>
+    </Card>
+  );
+}
 
-        {/* Run Button */}
-        <Button
-          onClick={handleRunAgents}
-          disabled={!goalInput.trim() || isProcessing}
-          className="w-full h-12 text-base font-semibold bg-violet-600 hover:bg-violet-700"
-        >
-          {isProcessing ? (
-            <>
-              <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
-              Your AI team is working...
-            </>
-          ) : (
-            <>
-              <Zap className="w-5 h-5 mr-2" />
-              Run agents
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </>
-          )}
-        </Button>
+export default function DashboardPage() {
+  return (
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Home</h1>
+          <p className="text-muted-foreground mt-1">Welcome back! Here's what's happening with your store.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">
+            <Calendar className="h-4 w-4 mr-2" />
+            Last 30 days
+          </Button>
+          <Button size="sm">
+            <Zap className="h-4 w-4 mr-2" />
+            Run Automation
+          </Button>
+        </div>
       </div>
 
-      {/* Active Agents Preview */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        {[
-          { name: "Planner", status: "ready", icon: "📝" },
-          { name: "Researcher", status: "ready", icon: "🔍" },
-          { name: "Analyst", status: "ready", icon: "📊" },
-          { name: "Marketing", status: "ready", icon: "📢" },
-          { name: "Writer", status: "ready", icon: "✍️" },
-          { name: "Critic", status: "ready", icon: "✓" },
-        ].map((agent, i) => (
-          <div
-            key={i}
-            className="flex items-center gap-2 p-3 rounded-lg bg-gray-50 border border-gray-100"
-          >
-            <span className="text-lg">{agent.icon}</span>
-            <div>
-              <p className="text-sm font-medium text-gray-900">{agent.name}</p>
-              <p className="text-xs text-green-600 capitalize">{agent.status}</p>
-            </div>
-          </div>
+      {/* Stats Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {stats.map((stat, index) => (
+          <StatCard key={index} stat={stat} />
         ))}
       </div>
 
-      {/* Report Panel Placeholder */}
-      <Card className="border-dashed border-2">
-        <CardContent className="p-8 text-center">
-          <div className="w-16 h-16 rounded-full bg-violet-50 flex items-center justify-center mx-auto mb-4">
-            <MessageCircle className="w-8 h-8 text-violet-400" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Your AI team is standing by
-          </h3>
-          <p className="text-gray-600 max-w-md mx-auto mb-4">
-            Type what you need above — in Hindi or English — and your team of 6 agents will research, analyse, and deliver verified results here.
-          </p>
-          <p className="text-sm text-violet-600 font-medium">
-            Try: &quot;Bring back my lost customers&quot;
-          </p>
-        </CardContent>
-      </Card>
+      {/* Main Content Grid */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Sales Chart - Takes 2 columns */}
+        <SalesChart />
+        
+        {/* Right Column */}
+        <div className="space-y-6">
+          <AutomationStatus />
+        </div>
+      </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Bottom Section */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <RecentOrdersTable />
+        
+        {/* Quick Actions */}
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Yesterday</p>
-                <p className="text-2xl font-bold text-gray-900">₹14,200</p>
-                <p className="text-xs text-emerald-600">+18%</p>
-              </div>
-              <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Orders</p>
-                <p className="text-2xl font-bold text-gray-900">19</p>
-                <p className="text-xs text-emerald-600">+5</p>
-              </div>
-              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                <Package className="w-5 h-5 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Lost Customers</p>
-                <p className="text-2xl font-bold text-gray-900">43</p>
-                <p className="text-xs text-amber-600">Need attention</p>
-              </div>
-              <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
-                <AlertCircle className="w-5 h-5 text-amber-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Next Briefing</p>
-                <p className="text-2xl font-bold text-gray-900">7:00 AM</p>
-                <p className="text-xs text-gray-500">Tomorrow</p>
-              </div>
-              <div className="w-10 h-10 rounded-lg bg-violet-50 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-violet-600" />
-              </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold">Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3">
+              <Link href="/dashboard/new-task">
+                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center gap-2">
+                  <Zap className="h-5 w-5" />
+                  <span className="text-sm">New Task</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/orders">
+                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center gap-2">
+                  <ShoppingBag className="h-5 w-5" />
+                  <span className="text-sm">View Orders</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/automations">
+                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center gap-2">
+                  <Package className="h-5 w-5" />
+                  <span className="text-sm">Automations</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/reports">
+                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  <span className="text-sm">Reports</span>
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
